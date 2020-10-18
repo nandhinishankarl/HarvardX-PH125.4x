@@ -1,0 +1,36 @@
+Data Import
+Import the brexit_polls polling data from the dslabs package and set options for the analysis:
+
+# suggested libraries and options
+library(tidyverse)
+options(digits = 3)
+
+# load brexit_polls object
+library(dslabs)
+data(brexit_polls)
+Final Brexit parameters
+Define  𝑝=0.481  as the actual percent voting "Remain" on the Brexit referendum and  𝑑=2𝑝−1=−0.038  as the actual spread of the Brexit referendum with "Remain" defined as the positive outcome:
+
+p <- 0.481    # official proportion voting "Remain"
+d <- 2*p-1    # official spread
+
+Question 1: Expected value and standard error of a poll
+
+
+The final proportion of voters choosing "Remain" was  𝑝=0.481 . Consider a poll with a sample of  𝑁=1500  voters.
+
+What is the expected total number of voters in the sample choosing "Remain"?
+
+N <- 1500
+N*p
+
+What is the standard error of the total number of voters in the sample choosing "Remain"?
+
+ se <- sqrt((p*(1-p))/N) 
+ 
+What is the expected value of  𝑋̂  , the proportion of "Remain" voters?
+
+X_hat <- p
+
+What is the standard error of  𝑋̂  , the proportion of "Remain" voters?
+
