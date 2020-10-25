@@ -1,0 +1,81 @@
+Question 4: Confidence intervals for polls in June
+
+Create the data frame june_polls containing only Brexit polls ending in June 2016 (enddate of "2016-06-01" and later). We will calculate confidence intervals for 
+all polls and determine how many cover the true value of  𝑑 .
+
+First, use mutate() to calculate a plug-in estimate se_x_hat for the standard error of the estimate  SE^[𝑋]  for each poll given its sample size and value of  
+𝑋̂   (x_hat). Second, use mutate() to calculate an estimate for the standard error of the spread for each poll given the value of se_x_hat. 
+Then, use mutate() to calculate upper and lower bounds for 95% confidence intervals of the spread. Last, add a column hit that indicates whether the 
+confidence interval for each poll covers the correct spread  𝑑=−0.038 .
+
+Code:
+
+june_polls <- brexit_polls %>%
+            filter(enddate > "2016-06-01") %>%
+            mutate(x_hat = (spread+1)/2,
+                    se_x_hat = sqrt(x_hat*(1-x_hat)/samplesize),
+                    lower = (x_hat - qnorm(0.975)*se_x_hat)-.5,
+                    upper = (x_hat + qnorm(0.975)*se_x_hat)-.5,
+                    hit_0 = lower <= 0 & upper >= 0,
+                    hit_remain = lower > 0,
+                    hit_actual = 2*lower < d & 2*upper > d)
+
+How many polls are in june_polls?
+
+nrow(june_polls)
+
+What proportion of polls have a confidence interval that covers the value 0?
+
+mean(june_polls$hit_0)
+
+What proportion of polls predict "Remain" (confidence interval entirely above 0)?
+
+mean(june_polls$hit_remain)
+
+What proportion of polls have a confidence interval covering the true value of  𝑑 ?
+
+mean(june_polls$hit_actual)
+
+Question 5: Hit rate by pollster
+
+Group and summarize the june_polls object by pollster to find the proportion of hits for each pollster and the number of polls per pollster. 
+Use arrange() to sort by hit rate.
+
+groupedpolls <- june_polls %>% group_by(pollster) %>% 
+summarize(hit = mean(hit_actual), polls = n()) %>% 
+arrange(desc(hit))
+
+Question 6: Boxplot of Brexit polls by poll type
+
+Make a boxplot of the spread in june_polls by poll type.
+
+bplot <- june_polls %>% group_by(poll_type) %>% 
+ggplot() + 
+geom_boxplot(aes(poll_type, spread))
+
+Question 7: Combined spread across poll type
+
+Calculate the confidence intervals of the spread combined across all polls in june_polls, grouping by poll type. Recall that to determine the standard error 
+of the spread, you will need to double the standard error of the estimate.
+
+Use this code (which determines the total sample size per poll type, gives each spread estimate a weight based on the poll's sample size, 
+and adds an estimate of p from the combined spread) to begin your analysis:
+
+combined_by_type <- june_polls %>%
+        group_by(poll_type) %>%
+        summarize(N = sum(samplesize),
+                  spread = sum(spread*samplesize)/N,
+                  p_hat = (spread + 1)/2)
+
+Answer:
+
+combined_by_type <- june_polls %>%
+            group_by(poll_type) %>%
+            summarize(N = sum(samplesize),
+                        spread = sum(spread*samplesize)/N,
+                        p_hat = (spread+1)/2,
+                        se_p_hat = 2*sqrt(p_hat*(1-p_hat)/N),    
+                        lower = (spread - (qnorm(0.975)*se_p_hat)),
+                        upper = (spread + (qnorm(0.975)*se_p_hat)))
+
+
